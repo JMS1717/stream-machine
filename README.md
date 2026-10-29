@@ -22,7 +22,7 @@ lives in a menu you open by **holding the Xbox button**. You don't need a keyboa
 
 <div align="center">
 <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-1080p.mp4"><img src="docs/screenshots/demo.jpg" alt="Watch the demo video (3:40): a TV streaming a game from a gaming PC in another room" width="80%"></a><br>
-<sub><b>Demo (3:40):</b> every feature on a real TV, start to finish. Download in <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-1080p.mp4">1080p</a> (100 MB) or <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-720p.mp4">720p</a> (27 MB).</sub>
+<sub><b>Demo (3:40):</b> every feature on a real TV, start to finish. <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-1080p.mp4">Watch or download</a> (1080p, 100 MB).</sub>
 </div>
 
 ## Why I built this
