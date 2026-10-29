@@ -21,8 +21,8 @@ console. The TV turns on with it and off with it, the stream starts when you pic
 lives in a menu you open by **holding the Xbox button**. You don't need a keyboard, a mouse or the TV remote.
 
 <div align="center">
-<a href="https://www.youtube.com/watch?v=cAKFC2R1WS4"><img src="docs/screenshots/demo.jpg" alt="Watch the demo video (3:40): a TV streaming a game from a gaming PC in another room" width="80%"></a><br>
-<sub><b>Demo (3:40):</b> every feature on a real TV, start to finish. <a href="https://www.youtube.com/watch?v=cAKFC2R1WS4">Watch it on YouTube</a>.</sub>
+<a href="https://www.youtube.com/watch?v=cAKFC2R1WS4"><img src="docs/screenshots/demo.jpg" alt="Stream Machine demo on YouTube (3:40)" width="80%"></a><br>
+<sub>Every feature on a real TV, start to finish. Click to watch on YouTube.</sub>
 </div>
 
 ## Why I built this
