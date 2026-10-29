@@ -1,0 +1,548 @@
+<Window x:Class="StreamMachine.Agent.Overlay.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:o="clr-namespace:StreamMachine.Agent.Overlay"
+        xmlns:a="clr-namespace:StreamMachine.Agent"
+        Title="Stream Machine" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="True" ResizeMode="NoResize"
+        FontFamily="Segoe UI Variable Display, Segoe UI" Foreground="#F4F3FF"
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType" UseLayoutRounding="True">
+  <Window.Resources>
+    <FontFamily x:Key="Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+    <SolidColorBrush x:Key="Text" Color="#F4F3FF"/>
+    <SolidColorBrush x:Key="Text2" Color="#A9A6C8"/>
+    <SolidColorBrush x:Key="Text3" Color="#6F6C8E"/>
+    <SolidColorBrush x:Key="Card" Color="#12FFFFFF"/>
+    <SolidColorBrush x:Key="CardLine" Color="#1CFFFFFF"/>
+    <LinearGradientBrush x:Key="Accent" StartPoint="0,0" EndPoint="1,1">
+      <GradientStop Color="#9479FF" Offset="0"/>
+      <GradientStop Color="#5B3BE6" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Danger" StartPoint="0,0" EndPoint="1,1">
+      <GradientStop Color="#FF6B86" Offset="0"/>
+      <GradientStop Color="#D93358" Offset="1"/>
+    </LinearGradientBrush>
+    <o:LevelBrush x:Key="LevelBrush"/>
+    <BooleanToVisibilityConverter x:Key="Vis"/>
+
+    <!-- Controller button glyph: a colored ring with a letter, like the pad itself. -->
+    <Style x:Key="PadButton" TargetType="Border">
+      <Setter Property="Width" Value="40"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="CornerRadius" Value="20"/>
+      <Setter Property="BorderThickness" Value="2.5"/>
+      <Setter Property="Background" Value="#16FFFFFF"/>
+      <Setter Property="Margin" Value="0,0,12,0"/>
+    </Style>
+    <Style x:Key="PadText" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="19"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="HintText" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="22"/>
+      <Setter Property="Foreground" Value="{StaticResource Text2}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="0,0,40,0"/>
+    </Style>
+
+    <!-- Volume slider bars: small in the menu row, big in the detail card. Amber = where the TV is while it walks there. -->
+    <DataTemplate x:Key="VolumeBarSmall" DataType="{x:Type o:VolumeSegment}">
+      <Border x:Name="Bar" Width="9" Height="24" Margin="0,0,3,0" CornerRadius="3" Background="#2EFFFFFF"/>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding On}" Value="True"><Setter TargetName="Bar" Property="Background" Value="#F4F3FF"/></DataTrigger>
+        <DataTrigger Binding="{Binding IsTv}" Value="True"><Setter TargetName="Bar" Property="Background" Value="#FFC24B"/></DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+    <DataTemplate x:Key="VolumeBarBig" DataType="{x:Type o:VolumeSegment}">
+      <Border x:Name="Bar" Width="26" Height="64" Margin="0,0,7,0" CornerRadius="7" Background="#1FFFFFFF"/>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding On}" Value="True"><Setter TargetName="Bar" Property="Background" Value="{StaticResource Accent}"/></DataTrigger>
+        <DataTrigger Binding="{Binding IsTv}" Value="True"><Setter TargetName="Bar" Property="Background" Value="#FFC24B"/></DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ListItem" DataType="{x:Type o:MenuItem}">
+      <Border x:Name="Card" Height="58" Margin="0,0,0,4" CornerRadius="16" Padding="26,0,26,0" Background="Transparent">
+        <Border.RenderTransform><TranslateTransform x:Name="Shift" X="0"/></Border.RenderTransform>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="56"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="Glyph" Text="{Binding Glyph}" FontFamily="{StaticResource Icons}" FontSize="28"
+                     Foreground="{StaticResource Text2}" VerticalAlignment="Center"/>
+          <TextBlock x:Name="Title" Grid.Column="1" Text="{Binding DisplayTitle}" FontSize="27" FontWeight="SemiBold"
+                     Foreground="#D9D7EE" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+          <Border x:Name="ValuePill" Grid.Column="2" CornerRadius="14" Padding="14,4" Background="#1CFFFFFF" VerticalAlignment="Center">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Value}" Value="">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding Value}" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Text}"/>
+          </Border>
+          <StackPanel x:Name="VolumeRow" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+            <ItemsControl ItemsSource="{Binding DataContext.Volume.Segments, RelativeSource={RelativeSource AncestorType=Window}}"
+                          ItemTemplate="{StaticResource VolumeBarSmall}" VerticalAlignment="Center">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <TextBlock Text="{Binding DataContext.Volume.Label, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="22"
+                       FontWeight="SemiBold" Width="58" TextAlignment="Right" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding IsVolume}" Value="True">
+          <Setter TargetName="VolumeRow" Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter TargetName="Card" Property="Background" Value="{StaticResource Accent}"/>
+          <Setter TargetName="Glyph" Property="Foreground" Value="White"/>
+          <Setter TargetName="Title" Property="Foreground" Value="White"/>
+          <Setter TargetName="ValuePill" Property="Background" Value="#33FFFFFF"/>
+          <Setter TargetName="Card" Property="Effect">
+            <Setter.Value><DropShadowEffect Color="#7C5CFF" BlurRadius="34" ShadowDepth="0" Opacity="0.55"/></Setter.Value>
+          </Setter>
+          <DataTrigger.EnterActions>
+            <BeginStoryboard>
+              <Storyboard>
+                <DoubleAnimation Storyboard.TargetName="Shift" Storyboard.TargetProperty="X" From="0" To="10" Duration="0:0:0.12">
+                  <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+              </Storyboard>
+            </BeginStoryboard>
+          </DataTrigger.EnterActions>
+          <DataTrigger.ExitActions>
+            <BeginStoryboard>
+              <Storyboard>
+                <DoubleAnimation Storyboard.TargetName="Shift" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.12"/>
+              </Storyboard>
+            </BeginStoryboard>
+          </DataTrigger.ExitActions>
+        </DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PowerItem" DataType="{x:Type o:MenuItem}">
+      <Border x:Name="Card" Height="100" Margin="0,0,14,0" CornerRadius="22" Background="{StaticResource Card}"
+              BorderBrush="{StaticResource CardLine}" BorderThickness="1.5">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock x:Name="Glyph" Text="{Binding Glyph}" FontFamily="{StaticResource Icons}" FontSize="30"
+                     HorizontalAlignment="Center" Foreground="{StaticResource Text2}"/>
+          <TextBlock x:Name="Title" Text="{Binding DisplayTitle}" FontSize="23" FontWeight="SemiBold" Margin="10,10,10,0"
+                     HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Foreground="#D9D7EE"/>
+        </StackPanel>
+      </Border>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter TargetName="Card" Property="Background" Value="{StaticResource Accent}"/>
+          <Setter TargetName="Card" Property="BorderBrush" Value="#55FFFFFF"/>
+          <Setter TargetName="Glyph" Property="Foreground" Value="White"/>
+          <Setter TargetName="Title" Property="Foreground" Value="White"/>
+          <Setter TargetName="Card" Property="Effect">
+            <Setter.Value><DropShadowEffect Color="#7C5CFF" BlurRadius="34" ShadowDepth="0" Opacity="0.55"/></Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <MultiDataTrigger>
+          <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding IsSelected}" Value="True"/>
+            <Condition Binding="{Binding Danger}" Value="True"/>
+          </MultiDataTrigger.Conditions>
+          <Setter TargetName="Card" Property="Background" Value="{StaticResource Danger}"/>
+          <Setter TargetName="Card" Property="Effect">
+            <Setter.Value><DropShadowEffect Color="#FF4D73" BlurRadius="34" ShadowDepth="0" Opacity="0.5"/></Setter.Value>
+          </Setter>
+        </MultiDataTrigger>
+        <DataTrigger Binding="{Binding IsArmed}" Value="True">
+          <Setter TargetName="Card" Property="Background" Value="{StaticResource Danger}"/>
+          <Setter TargetName="Title" Property="FontSize" Value="19"/>
+        </DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ChipTemplate" DataType="{x:Type o:Chip}">
+      <Border CornerRadius="22" Padding="18,9,20,9" Margin="0,0,14,0" Background="{StaticResource Card}"
+              BorderBrush="{StaticResource CardLine}" BorderThickness="1">
+        <StackPanel Orientation="Horizontal">
+          <Ellipse Width="11" Height="11" Fill="{Binding Level, Converter={StaticResource LevelBrush}}" VerticalAlignment="Center" Margin="0,0,11,0"/>
+          <TextBlock Text="{Binding Label}" FontSize="19" Foreground="{StaticResource Text2}" VerticalAlignment="Center" Margin="0,0,9,0"/>
+          <TextBlock Text="{Binding Text}" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="HealthTemplate" DataType="{x:Type a:HealthRow}">
+      <Border Margin="0,0,18,10" CornerRadius="16" Padding="20,12" Background="{StaticResource Card}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="26"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Ellipse Width="12" Height="12" Fill="{Binding Level, Converter={StaticResource LevelBrush}}" VerticalAlignment="Top" Margin="0,8,0,0"/>
+          <StackPanel Grid.Column="1">
+            <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding Detail}" FontSize="18" Foreground="{StaticResource Text2}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="SettingTemplate" DataType="{x:Type o:SettingItem}">
+      <Grid>
+        <TextBlock x:Name="Header" Text="{Binding Title}" FontSize="19" FontWeight="SemiBold" Foreground="#9479FF"
+                   Margin="26,16,0,8" Visibility="Collapsed"/>
+        <Border x:Name="Row" Height="56" Margin="0,0,0,4" CornerRadius="16" Padding="26,0,18,0" Background="Transparent">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="Title" Text="{Binding Title}" FontSize="25" FontWeight="SemiBold" Foreground="#D9D7EE"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock x:Name="Left" Text="&#xE76B;" FontFamily="{StaticResource Icons}" FontSize="16" VerticalAlignment="Center"
+                         Margin="0,0,8,0" Visibility="Hidden" Foreground="White"/>
+              <Border x:Name="Pill" CornerRadius="13" Padding="14,3" Background="#1CFFFFFF" MinWidth="70">
+                <TextBlock Text="{Binding ValueLabel}" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+              </Border>
+              <TextBlock x:Name="Right" Text="&#xE76C;" FontFamily="{StaticResource Icons}" FontSize="16" VerticalAlignment="Center"
+                         Margin="8,0,0,0" Visibility="Hidden" Foreground="White"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding IsHeader}" Value="True">
+          <Setter TargetName="Row" Property="Visibility" Value="Collapsed"/>
+          <Setter TargetName="Header" Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter TargetName="Row" Property="Background" Value="{StaticResource Accent}"/>
+          <Setter TargetName="Title" Property="Foreground" Value="White"/>
+          <Setter TargetName="Pill" Property="Background" Value="#33FFFFFF"/>
+          <Setter TargetName="Left" Property="Visibility" Value="Visible"/>
+          <Setter TargetName="Right" Property="Visibility" Value="Visible"/>
+          <Setter TargetName="Row" Property="Effect">
+            <Setter.Value><DropShadowEffect Color="#7C5CFF" BlurRadius="30" ShadowDepth="0" Opacity="0.5"/></Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding CanChange}" Value="False">
+          <Setter TargetName="Left" Property="Visibility" Value="Hidden"/>
+          <Setter TargetName="Right" Property="Visibility" Value="Hidden"/>
+        </DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+    <DataTemplate x:Key="TvTemplate" DataType="{x:Type o:TvRow}">
+      <Border x:Name="Row" Margin="0,0,0,8" CornerRadius="18" Padding="26,14" Background="{StaticResource Card}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="54"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="Glyph" Text="&#xE7F4;" FontFamily="{StaticResource Icons}" FontSize="30" VerticalAlignment="Center" Foreground="{StaticResource Text2}"/>
+          <StackPanel Grid.Column="1">
+            <TextBlock x:Name="Name" Text="{Binding Name}" FontSize="27" FontWeight="SemiBold" Foreground="#D9D7EE" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="Detail" Text="{Binding Detail}" FontSize="19" Foreground="{StaticResource Text2}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+          </StackPanel>
+          <Border Grid.Column="2" CornerRadius="14" Padding="14,5" Background="#1CFFFFFF" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <Ellipse Width="10" Height="10" Fill="{Binding Level, Converter={StaticResource LevelBrush}}" VerticalAlignment="Center" Margin="0,0,9,0"/>
+              <TextBlock Text="{Binding State}" FontSize="19" FontWeight="SemiBold"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+      <DataTemplate.Triggers>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter TargetName="Row" Property="Background" Value="{StaticResource Accent}"/>
+          <Setter TargetName="Name" Property="Foreground" Value="White"/>
+          <Setter TargetName="Glyph" Property="Foreground" Value="White"/>
+          <Setter TargetName="Detail" Property="Foreground" Value="#E6FFFFFF"/>
+          <Setter TargetName="Row" Property="Effect">
+            <Setter.Value><DropShadowEffect Color="#7C5CFF" BlurRadius="30" ShadowDepth="0" Opacity="0.5"/></Setter.Value>
+          </Setter>
+        </DataTrigger>
+      </DataTemplate.Triggers>
+    </DataTemplate>
+  </Window.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid x:Name="Root" Width="1920" Height="1080" RenderTransformOrigin="0.5,0.5">
+      <Grid.RenderTransform><ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1"/></Grid.RenderTransform>
+      <!-- Backdrop: near-opaque so it reads on a bright stream, with a soft violet glow. -->
+      <Rectangle>
+        <Rectangle.Fill>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FC0A0912" Offset="0"/>
+            <GradientStop Color="#FD0D0B18" Offset="0.55"/>
+            <GradientStop Color="#FE070710" Offset="1"/>
+          </LinearGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+      <Rectangle>
+        <Rectangle.Fill>
+          <RadialGradientBrush Center="0.12,0.05" GradientOrigin="0.12,0.05" RadiusX="0.75" RadiusY="0.9">
+            <GradientStop Color="#447C5CFF" Offset="0"/>
+            <GradientStop Color="#00000000" Offset="1"/>
+          </RadialGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+      <Rectangle>
+        <Rectangle.Fill>
+          <RadialGradientBrush Center="0.95,1.05" GradientOrigin="0.95,1.05" RadiusX="0.6" RadiusY="0.7">
+            <GradientStop Color="#2A2BD4C4" Offset="0"/>
+            <GradientStop Color="#00000000" Offset="1"/>
+          </RadialGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+
+      <Grid Margin="112,58,112,48">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
+            <TextBlock Text="{Binding Clock}" FontSize="60" FontWeight="Light" HorizontalAlignment="Right"/>
+            <TextBlock Text="{Binding Date}" FontSize="21" Foreground="{StaticResource Text2}" HorizontalAlignment="Right" Margin="0,-4,0,0"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Border Width="62" Height="62" CornerRadius="18" Background="{StaticResource Accent}">
+              <Border.Effect><DropShadowEffect Color="#7C5CFF" BlurRadius="30" ShadowDepth="0" Opacity="0.6"/></Border.Effect>
+              <TextBlock Text="&#xE7FC;" FontFamily="{StaticResource Icons}" FontSize="32" Foreground="White"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Margin="22,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="Stream Machine" FontSize="40" FontWeight="SemiBold"/>
+              <TextBlock Text="{Binding Subtitle}" FontSize="19" Foreground="{StaticResource Text3}" Margin="2,-2,0,0"/>
+            </StackPanel>
+          </StackPanel>
+        </DockPanel>
+
+        <!-- Status chips -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,24,0,26">
+          <ContentControl Content="{Binding TvChip}" ContentTemplate="{StaticResource ChipTemplate}"/>
+          <ContentControl Content="{Binding HostChip}" ContentTemplate="{StaticResource ChipTemplate}"/>
+          <ContentControl Content="{Binding StreamChip}" ContentTemplate="{StaticResource ChipTemplate}"/>
+          <ContentControl Content="{Binding PadChip}" ContentTemplate="{StaticResource ChipTemplate}"/>
+        </StackPanel>
+
+        <!-- Menu page -->
+        <Grid Grid.Row="2" Visibility="{Binding IsMenu, Converter={StaticResource Vis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="840"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource ListItem}"/>
+            <ItemsControl ItemsSource="{Binding PowerItems}" ItemTemplate="{StaticResource PowerItem}" Margin="0,12,-14,0">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </StackPanel>
+
+          <!-- Detail card for the selected item -->
+          <Border Grid.Column="2" CornerRadius="30" Background="{StaticResource Card}" BorderBrush="{StaticResource CardLine}"
+                  BorderThickness="1.5" Padding="52,50,52,40">
+            <DockPanel LastChildFill="False">
+            <Border DockPanel.Dock="Bottom" CornerRadius="20" Background="#10FFFFFF" Padding="22,16" HorizontalAlignment="Stretch">
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource PadButton}" BorderBrush="#3DDC97"><TextBlock Style="{StaticResource PadText}" Text="A" Foreground="#3DDC97"/></Border>
+                <TextBlock Text="{Binding Selected.Action}" FontSize="25" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+            <StackPanel DockPanel.Dock="Top">
+              <Border Width="108" Height="108" CornerRadius="32" HorizontalAlignment="Left">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Selected.Danger}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource Danger}"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding Selected.Glyph}" FontFamily="{StaticResource Icons}" FontSize="52" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <TextBlock Text="{Binding Selected.Title}" FontSize="46" FontWeight="SemiBold" Margin="0,36,0,0"/>
+              <TextBlock Text="{Binding Description}" FontSize="27" Foreground="{StaticResource Text2}" TextWrapping="Wrap"
+                         LineHeight="40" Margin="0,16,0,0"/>
+              <Border CornerRadius="20" Background="#10FFFFFF" Padding="26,22" Margin="0,30,0,0" HorizontalAlignment="Left">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Selected.Id}" Value="Volume">
+                        <Setter Property="Visibility" Value="Visible"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+                <StackPanel>
+                  <StackPanel Orientation="Horizontal">
+                    <ItemsControl ItemsSource="{Binding Volume.Segments}" ItemTemplate="{StaticResource VolumeBarBig}" VerticalAlignment="Center">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding Volume.Label}" FontSize="54" FontWeight="SemiBold" Margin="14,0,0,0" VerticalAlignment="Center"/>
+                  </StackPanel>
+                  <TextBlock Text="{Binding Volume.Status}" FontSize="22" Foreground="{StaticResource Text2}" Margin="2,14,0,0"/>
+                </StackPanel>
+              </Border>
+            </StackPanel>
+            </DockPanel>
+          </Border>
+        </Grid>
+
+        <!-- Health page -->
+        <Grid Grid.Row="2" Visibility="{Binding IsHealth, Converter={StaticResource Vis}}">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
+            <TextBlock Text="&#xE9D9;" FontFamily="{StaticResource Icons}" FontSize="38" VerticalAlignment="Center" Foreground="#9479FF"/>
+            <TextBlock Text="Health" FontSize="44" FontWeight="SemiBold" Margin="18,0,24,0" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding HealthSummary}" FontSize="24" Foreground="{StaticResource Text2}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <ItemsControl Grid.Row="1" ItemsSource="{Binding HealthRows}" ItemTemplate="{StaticResource HealthTemplate}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><UniformGrid Columns="3" VerticalAlignment="Top"/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </Grid>
+
+        <!-- Settings page -->
+        <Grid Grid.Row="2" Visibility="{Binding IsSettings, Converter={StaticResource Vis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="840"/>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <ScrollViewer x:Name="SettingsScroll" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <ItemsControl x:Name="SettingsList" ItemsSource="{Binding Settings.Items}" ItemTemplate="{StaticResource SettingTemplate}" Margin="0,0,0,40"/>
+          </ScrollViewer>
+          <Border Grid.Column="2" CornerRadius="30" Background="{StaticResource Card}" BorderBrush="{StaticResource CardLine}"
+                  BorderThickness="1.5" Padding="52,46,52,40">
+            <DockPanel LastChildFill="False">
+              <Border DockPanel.Dock="Bottom" CornerRadius="20" Background="#10FFFFFF" Padding="22,16">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="&#xE76B;  &#xE76C;" FontFamily="{StaticResource Icons}" FontSize="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                  <TextBlock Text="change" FontSize="23" Foreground="{StaticResource Text2}" VerticalAlignment="Center" Margin="0,0,30,0"/>
+                  <Border Style="{StaticResource PadButton}" BorderBrush="#3DDC97"><TextBlock Style="{StaticResource PadText}" Text="A" Foreground="#3DDC97"/></Border>
+                  <TextBlock Text="next" FontSize="23" Foreground="{StaticResource Text2}" VerticalAlignment="Center" Margin="0,0,30,0"/>
+                  <Border Style="{StaticResource PadButton}" BorderBrush="#FF5C7A"><TextBlock Style="{StaticResource PadText}" Text="B" Foreground="#FF5C7A"/></Border>
+                  <TextBlock Text="back" FontSize="23" Foreground="{StaticResource Text2}" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Border>
+              <StackPanel DockPanel.Dock="Top">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="&#xE713;" FontFamily="{StaticResource Icons}" FontSize="22" Foreground="#9479FF" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Settings.Selected.Section}" FontSize="22" Foreground="#9479FF" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{Binding Settings.Selected.Title}" FontSize="44" FontWeight="SemiBold" Margin="0,22,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Settings.Selected.Description}" FontSize="26" Foreground="{StaticResource Text2}" TextWrapping="Wrap"
+                           LineHeight="38" Margin="0,14,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,40,0,0">
+                  <Border Width="64" Height="64" CornerRadius="32" Background="#16FFFFFF">
+                    <TextBlock Text="&#xE76B;" FontFamily="{StaticResource Icons}" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </Border>
+                  <Border CornerRadius="22" Background="{StaticResource Accent}" Padding="34,10" Margin="16,0" MinWidth="220">
+                    <TextBlock Text="{Binding Settings.Selected.ValueLabel}" FontSize="38" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
+                  </Border>
+                  <Border Width="64" Height="64" CornerRadius="32" Background="#16FFFFFF">
+                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource Icons}" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </Border>
+                </StackPanel>
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </Grid>
+
+        <!-- TV setup page -->
+        <Grid Grid.Row="2" Visibility="{Binding IsTvs, Converter={StaticResource Vis}}">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="&#xE7F4;" FontFamily="{StaticResource Icons}" FontSize="36" VerticalAlignment="Center" Foreground="#9479FF"/>
+            <TextBlock Text="TVs" FontSize="44" FontWeight="SemiBold" Margin="18,0,24,0" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding TvMessage}" FontSize="24" Foreground="{StaticResource Text2}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="1300"/>
+          </StackPanel>
+          <ItemsControl Grid.Row="1" ItemsSource="{Binding TvRows}" ItemTemplate="{StaticResource TvTemplate}" MaxWidth="1200" HorizontalAlignment="Left" Width="1200"/>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+            <Border Style="{StaticResource PadButton}" BorderBrush="#3DDC97"><TextBlock Style="{StaticResource PadText}" Text="A" Foreground="#3DDC97"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Set up / pair again"/>
+            <Border Style="{StaticResource PadButton}" BorderBrush="#FFC24B"><TextBlock Style="{StaticResource PadText}" Text="Y" Foreground="#FFC24B"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Make main TV"/>
+            <Border Style="{StaticResource PadButton}" BorderBrush="#5AA9FF"><TextBlock Style="{StaticResource PadText}" Text="X" Foreground="#5AA9FF"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Remove"/>
+            <Border Style="{StaticResource PadButton}" Width="54" BorderBrush="#A9A6C8"><TextBlock Style="{StaticResource PadText}" FontSize="16" Text="RB" Foreground="#D9D7EE"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Search again"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Hint bar -->
+        <DockPanel Grid.Row="3" Margin="0,22,0,0">
+          <DockPanel.Style>
+            <Style TargetType="DockPanel">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsTvs}" Value="True"><Setter Property="Visibility" Value="Hidden"/></DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </DockPanel.Style>
+          <TextBlock DockPanel.Dock="Right" Style="{StaticResource HintText}" Margin="0" Foreground="{StaticResource Text3}"
+                     Text="Hold View + Menu anytime to open"/>
+          <StackPanel Orientation="Horizontal">
+            <Border Style="{StaticResource PadButton}" BorderBrush="#3DDC97"><TextBlock Style="{StaticResource PadText}" Text="A" Foreground="#3DDC97"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Select"/>
+            <Border Style="{StaticResource PadButton}" BorderBrush="#FF5C7A"><TextBlock Style="{StaticResource PadText}" Text="B" Foreground="#FF5C7A"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Back"/>
+            <Border Style="{StaticResource PadButton}" Width="54" BorderBrush="#A9A6C8" Margin="0,0,8,0"><TextBlock Style="{StaticResource PadText}" FontSize="16" Text="LB" Foreground="#D9D7EE"/></Border>
+            <Border Style="{StaticResource PadButton}" Width="54" BorderBrush="#A9A6C8"><TextBlock Style="{StaticResource PadText}" FontSize="16" Text="RB" Foreground="#D9D7EE"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="TV volume"/>
+            <Border Style="{StaticResource PadButton}" BorderBrush="#FFC24B"><TextBlock Style="{StaticResource PadText}" Text="Y" Foreground="#FFC24B"/></Border>
+            <TextBlock Style="{StaticResource HintText}" Text="Mute"/>
+          </StackPanel>
+        </DockPanel>
+
+        <!-- Toast -->
+        <Border Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="30" Padding="30,12"
+                Background="#F21C1A2B" BorderBrush="#669479FF" BorderThickness="1.5" Opacity="0" IsHitTestVisible="False">
+          <Border.Effect><DropShadowEffect Color="Black" BlurRadius="40" ShadowDepth="0" Opacity="0.6"/></Border.Effect>
+          <Border.Style>
+            <Style TargetType="Border">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ToastVisible}" Value="True">
+                  <DataTrigger.EnterActions>
+                    <BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15"/></Storyboard></BeginStoryboard>
+                  </DataTrigger.EnterActions>
+                  <DataTrigger.ExitActions>
+                    <BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.4"/></Storyboard></BeginStoryboard>
+                  </DataTrigger.ExitActions>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding Toast}" FontSize="26" FontWeight="SemiBold"/>
+        </Border>
+      </Grid>
+    </Grid>
+  </Viewbox>
+</Window>

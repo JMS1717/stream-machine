@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamMachine.Core", "StreamMachine.Core\StreamMachine.Core.csproj", "{26EADEB7-27B7-4EF4-BB18-5E84DEA9E629}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamMachine.Service", "StreamMachine.Service\StreamMachine.Service.csproj", "{D44B3972-5AAE-4FB4-9FD9-02DE70174BB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamMachine.Agent", "StreamMachine.Agent\StreamMachine.Agent.csproj", "{4B802AE4-D4BB-418B-8EFE-319F0790C09C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamMachine.Tests", "StreamMachine.Tests\StreamMachine.Tests.csproj", "{5BCC5768-0250-4509-8C48-DA97C9FCF239}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamMachine.Cli", "StreamMachine.Cli\StreamMachine.Cli.csproj", "{0A82D163-DB9D-4993-B14E-969C3AFAC30F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26EADEB7-27B7-4EF4-BB18-5E84DEA9E629}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{26EADEB7-27B7-4EF4-BB18-5E84DEA9E629}.Debug|Any CPU.Build.0 = Debug|x64
+		{26EADEB7-27B7-4EF4-BB18-5E84DEA9E629}.Release|Any CPU.ActiveCfg = Release|x64
+		{26EADEB7-27B7-4EF4-BB18-5E84DEA9E629}.Release|Any CPU.Build.0 = Release|x64
+		{D44B3972-5AAE-4FB4-9FD9-02DE70174BB4}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{D44B3972-5AAE-4FB4-9FD9-02DE70174BB4}.Debug|Any CPU.Build.0 = Debug|x64
+		{D44B3972-5AAE-4FB4-9FD9-02DE70174BB4}.Release|Any CPU.ActiveCfg = Release|x64
+		{D44B3972-5AAE-4FB4-9FD9-02DE70174BB4}.Release|Any CPU.Build.0 = Release|x64
+		{4B802AE4-D4BB-418B-8EFE-319F0790C09C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{4B802AE4-D4BB-418B-8EFE-319F0790C09C}.Debug|Any CPU.Build.0 = Debug|x64
+		{4B802AE4-D4BB-418B-8EFE-319F0790C09C}.Release|Any CPU.ActiveCfg = Release|x64
+		{4B802AE4-D4BB-418B-8EFE-319F0790C09C}.Release|Any CPU.Build.0 = Release|x64
+		{5BCC5768-0250-4509-8C48-DA97C9FCF239}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{5BCC5768-0250-4509-8C48-DA97C9FCF239}.Debug|Any CPU.Build.0 = Debug|x64
+		{5BCC5768-0250-4509-8C48-DA97C9FCF239}.Release|Any CPU.ActiveCfg = Release|x64
+		{5BCC5768-0250-4509-8C48-DA97C9FCF239}.Release|Any CPU.Build.0 = Release|x64
+		{0A82D163-DB9D-4993-B14E-969C3AFAC30F}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{0A82D163-DB9D-4993-B14E-969C3AFAC30F}.Debug|Any CPU.Build.0 = Debug|x64
+		{0A82D163-DB9D-4993-B14E-969C3AFAC30F}.Release|Any CPU.ActiveCfg = Release|x64
+		{0A82D163-DB9D-4993-B14E-969C3AFAC30F}.Release|Any CPU.Build.0 = Release|x64
+	EndGlobalSection
+EndGlobal

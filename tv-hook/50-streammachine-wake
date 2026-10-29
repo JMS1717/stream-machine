@@ -1,0 +1,4 @@
+#!/bin/sh
+# Homebrew Channel init.d hook (runs at TV boot): start the Stream Machine wake watcher in the background.
+[ -x /home/root/streammachine/streammachine-wake.sh ] || exit 0
+nohup /home/root/streammachine/streammachine-wake.sh >/dev/null 2>&1 &
