@@ -20,6 +20,11 @@ You have a gaming PC somewhere in the house and a small PC under the TV that str
 console. The TV turns on with it and off with it, the stream starts when you pick up the controller, and everything else
 lives in a menu you open by **holding the Xbox button**. You don't need a keyboard, a mouse or the TV remote.
 
+<div align="center">
+<a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-1080p.mp4"><img src="docs/screenshots/demo.jpg" alt="Watch the demo video (3:40): a TV streaming a game from a gaming PC in another room" width="80%"></a><br>
+<sub><b>Demo (3:40):</b> every feature on a real TV, start to finish. Download in <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-1080p.mp4">1080p</a> (100 MB) or <a href="https://github.com/JMS1717/stream-machine/releases/download/v2.0.0/StreamMachine-demo-720p.mp4">720p</a> (27 MB).</sub>
+</div>
+
 ## Why I built this
 
 I built Stream Machine for my own house. There's one gaming PC, and I wanted to play it from any room with a TV
