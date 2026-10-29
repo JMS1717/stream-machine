@@ -16,9 +16,29 @@ A lightweight **Bazzite alternative that keeps Windows**, and on Linux it runs o
 </div>
 
 You have a gaming PC somewhere in the house and a small PC under the TV that streams from it (with
-[Punktfunk](https://punktfunk.app), [Moonlight](https://moonlight-stream.org) or Parsec). Stream Machine makes that small PC behave like a
+[Punktfunk](https://punktfunk.unom.io), [Moonlight](https://moonlight-stream.org) or Parsec). Stream Machine makes that small PC behave like a
 console. The TV turns on with it and off with it, the stream starts when you pick up the controller, and everything else
 lives in a menu you open by **holding the Xbox button**. You don't need a keyboard, a mouse or the TV remote.
+
+## Why I built this
+
+I built Stream Machine for my own house. There's one gaming PC, and I wanted to play it from any room with a TV
+without buying a console for every room or walking over to the PC whenever something needed a click. Each TV gets a
+small, cheap PC that streams from the gaming PC, and Stream Machine makes that little PC feel like a console. I use it
+every day and I love it.
+
+## Why it's so good now: PyroWave
+
+Streaming used to be the weak link. Codecs built for the internet spend their effort saving bandwidth, and that costs
+latency and image quality. [PyroWave](https://github.com/Themaister/pyrowave) flips that around. It's a game-streaming
+codec by Themaister that compresses every frame on its own, entirely on the GPU, and spends bandwidth (100+ Mbit/s)
+to keep latency as low as possible. Inside a house there's bandwidth to spare, and over a wired network the stream feels like
+the TV is plugged straight into the gaming PC. That's what turned multi-room gaming from "good enough" into something I'd
+pick over sitting at the desk.
+
+**My recommendation: [Punktfunk](https://punktfunk.unom.io) with PyroWave**, over Ethernet if you can. Punktfunk
+bundles PyroWave, and Stream Machine knows how to start it, end it and pass the Xbox button through. You don't have to
+use it, though: Moonlight, Parsec, or anything you can start from a command line works too. You choose in Settings.
 
 ## Why not just install Bazzite?
 
